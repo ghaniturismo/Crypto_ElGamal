@@ -4,10 +4,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <time.h>
 
 #define WORD_BIT (sizeof(int) * CHAR_BIT)
 
-
+gmp_randstate_t state;
 gmp_randstate_t generator;
 
 //generate a number of exactly k_bit
@@ -68,8 +69,14 @@ int expmod(int base, int exponent, int modulo) {
 
 int main(int argc, char * argv[]){
     
-    mpz_t g;
-    mpz_t p;
+    mpz_t g,p;
+    mpz_t x;
+
+     // init random state
+    gmp_randinit_mt(state);
+    gmp_randseed_ui(state, time(NULL));
+
+    mpz_inits(x,NULL);
 
     // G initialization
     mpz_init(g);
@@ -79,9 +86,13 @@ int main(int argc, char * argv[]){
     // P initialization
     mpz_init(p);
     mpz_set_str(p, P_VAL_HEXA, 16);
-    gmp_printf("p en 1024 bit rfc2409 = %Zd \n", p);
+    gmp_printf("p en 1024 bit rfc2409 = \n%Zd \n", p);
 
     gmp_printf("paire(p,g) = ( %Zd ,  %Zd )\n", p,g);
+
+    mpz_urandomm(x, state, p);
+    gmp_printf("x = \n%Zd  \n", x);
+
 
   	int n;
 	gmp_randinit_default(generator);    
