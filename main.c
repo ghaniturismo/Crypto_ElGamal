@@ -70,13 +70,13 @@ int expmod(int base, int exponent, int modulo) {
 int main(int argc, char * argv[]){
     
     mpz_t g,p;
-    mpz_t x;
+    mpz_t x,y;
 
      // init random state
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, time(NULL));
 
-    mpz_inits(x,NULL);
+    mpz_inits(x,y,NULL);
 
     // G initialization
     mpz_init(g);
@@ -93,20 +93,28 @@ int main(int argc, char * argv[]){
     mpz_urandomm(x, state, p);
     gmp_printf("x = \n%Zd  \n", x);
 
+    mpz_powm(y, g, x, p);  // calcule de la cle public 2eme methode 
+    gmp_printf("===publicKeyOfA===\n%Zd\n", y);
 
+
+//---------------------------------------------------------------------------------//
   	int n;
 	gmp_randinit_default(generator);    
-//msg to encrypt
+    //msg to encrypt
     mpz_t msg1,msg2;
     mpz_inits(msg1,msg2, NULL);
     generate_number(msg1,16);
     generate_prime_number(msg2,16);
     gmp_printf("msg number :%Zu \n",msg1);
     gmp_printf("msg alea number :%Zu \n",msg2);
+//---------------------------------------------------------------------------------//
+
 
 int a;
 a = expmod(432, 18, 765);
 printf("expmod(19,1024,62) = %d\n", a);
+
+
 
 return 0;
 }
