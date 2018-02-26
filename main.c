@@ -1,5 +1,6 @@
 #include "gmp.h"
 #include "main.h"
+#include "euclide.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -10,6 +11,10 @@
 
 gmp_randstate_t state;
 gmp_randstate_t generator;
+
+mpz_t uFinal;
+mpz_t vFinal;
+mpz_t p_global;
 
 //generate a number of exactly k_bit
 void generate_number(mpz_t alea, unsigned int nbr_bit)
@@ -109,9 +114,20 @@ int main(int argc, char * argv[]){
     gmp_printf("msg alea number :%Zu \n",msg2);
 //---------------------------------------------------------------------------------//
 
-int a;
-a = expmod(432, 18, 765);
-printf("expmod(19,1024,62) = %d\n", a);
+int a1;
+a1 = expmod(432, 18, 765);
+printf("expmod(19,1024,62) = %d\n", a1);
 
+//*********************************************************************************//
+  //Initialisation des variables mpz
+  mpz_t a;
+  mpz_t p1;
+  mpz_inits(a,p1,p_global,NULL);
+  //Affectation des valeurs
+  mpz_init_set_ui(a, 13);
+  mpz_init_set_ui(p1, 60);
+  mpz_init_set_ui(p_global, 60);
+  euclide(a,p1);
+//*********************************************************************************//
 return 0;
 }

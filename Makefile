@@ -1,12 +1,12 @@
 CC = gcc
 CFLAGS = -lgmpxx -lgmp
 
-OBJS = main.c
+OBJS = main.c euclide.c
 
 main: $(OBJS)
 	$(CC) -o main $(OBJS) $(CFLAGS) 
 
-main.o: main.c
+main.o: main.c euclide.c
 
 
 prime_genere: prime_genere.c
