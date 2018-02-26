@@ -8,6 +8,7 @@
 
 mpz_t uFinal;
 mpz_t vFinal;
+
 /*
   Affiche au + bv = p
  */
@@ -117,130 +118,82 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
 
 /*---------------------------------------------------------------------*/
 
-/*
-  Implementation de la fonction phi definie dans le sujet 
-  phi(a, b, 0) = b et phi(a, b, n) = phi(a + b, b, n-1).
-  Tous les parametres doivent etre initialises.
-*/
-/*
-void phi(mpz_t a, mpz_t b, mpz_t n, mpz_t res)
-{
-  if (!mpz_cmp_ui(n, 0))
-    {
-      mpz_set(res, b);
-    }
-  else
-    {
-      mpz_t aPlusB;
-      mpz_t nMoinsUn;
-      mpz_init(aPlusB);
-      mpz_init(nMoinsUn);
-      mpz_add(aPlusB, a, b);
-      mpz_sub_ui(nMoinsUn, n, 1);
-      phi(aPlusB, a, nMoinsUn, res);
-      mpz_clear(aPlusB);
-      mpz_clear(nMoinsUn);
-    }
-}*/
 
 
 /*---------------------------------------------------------------------*/
 
-/*
-  Place dans res le n-eme nombes de Fibonacci.
-  Tous les parametres doivent etre initialises.
-*/
-
-/*void fibo(mpz_t n, mpz_t res)
-{
-  mpz_t zero;
-  mpz_t un;
-  mpz_init_set_ui(zero, 0);
-  mpz_init_set_ui(un, 1);
-  phi(un, zero, n, res);
-  mpz_clear(zero);
-  mpz_clear(un);
-}*/
-
-/*---------------------------------------------------------------------*/
-
-/*int main()
-{
-  mpz_t zero;
-  mpz_t u;
-  mpz_t v;
-  mpz_t p;
-  mpz_t cent;
-  mpz_t centUn;
-  mpz_t Fcent;
-  mpz_t FcentUn;
-  mpz_init(zero);
-  mpz_init(u);
-  mpz_init(v);
-  mpz_init(p);
-  mpz_init_set_ui(zero, 0);
-  mpz_init_set_ui(cent, 100);
-  mpz_init_set_ui(centUn, 101) ;
-
-  mpz_init_set_ui(p, 1);
-
-  mpz_init(Fcent);
-  mpz_init(FcentUn);
-  fibo(cent, Fcent);
-  fibo(centUn, FcentUn);
-  bezout(FcentUn, Fcent, u, v, p, zero);
-
-  mpz_clear(u);
-  mpz_clear(v);
-  mpz_clear(p);
-  mpz_clear(cent);
-  mpz_clear(centUn);
-  mpz_clear(Fcent);
-  mpz_clear(FcentUn);
-  return 0;
-}*/
 int euclide(mpz_t a, mpz_t p)
 {
+  
+  
   mpz_t zero;
   mpz_t x;
   mpz_t y;
   mpz_t u;
   mpz_t v;
+
+  //mpz_mod(u,u,p);
+//******
+  mpz_t t1;
+  mpz_t t2; 
+  mpz_init(t1);
+  mpz_init(t2);
+    
   mpz_init(zero);
   mpz_init(x);
   mpz_init(y);
   mpz_init(u);
   mpz_init(v);
+  
   mpz_init_set_ui(zero, 0);
   mpz_init_set_ui(x, mpz_get_ui(a));
   mpz_init_set_ui(y, mpz_get_ui(p));
 
   bezout(x, y, u, v, p, zero);
+  printf("\n\n\nT1 : ");
 
-  //uFinal = u;
-  //vFinal = v;
-  /*printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
-  printf("\n\n\nUFINAL : ");
-  mpz_out_str(NULL, 10, uFinal);
-  printf("\n\n\nVFINAL : ");
-  mpz_out_str(NULL, 10, vFinal);
-  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");*/
+//  mpz_init_set_ui(t1, 0);
+  mpz_init_set_ui(t2, -23);
+  mpz_mod(t2,t2,p);
+  
+  mpz_out_str(NULL, 10,t2);
+//*******
+  mpz_init(uFinal);
+  mpz_init(vFinal);
+  mpz_init_set_ui(uFinal, mpz_get_ui(u));
+  mpz_init_set_ui(vFinal, mpz_get_ui(v));
+
   mpz_clear(u);
   mpz_clear(v);
   mpz_clear(x);
   mpz_clear(y);
+
   return 0;
 }
 
 int main(int argc, char const *argv[])
 {
+
+  //Initialisation des variables mpz
   mpz_t a;
   mpz_t p;
   mpz_init(a);
   mpz_init(p);
-  mpz_init_set_ui(a, 17);
-  mpz_init_set_ui(p, 13) ;
+  //Affectation des valeurs
+  mpz_init_set_ui(a, 13);
+  mpz_init_set_ui(p, 60) ;
   euclide(a,p);
+
+  //mpz_t uFinal;
+  //mpz_t vFinal;
+
+  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+  printf("\n\n\nUFINAL : ");
+  mpz_out_str(NULL, 10, uFinal);
+  printf("\n\n\nVFINAL : ");
+  mpz_out_str(NULL, 10, vFinal);
+  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+
   mpz_clear(a);
   mpz_clear(p);
   mpz_clear(uFinal);
