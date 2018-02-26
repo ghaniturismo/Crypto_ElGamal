@@ -133,12 +133,13 @@ int euclide(mpz_t a, mpz_t p)
   mpz_t v;
 
   //mpz_mod(u,u,p);
-//******
+  
+  //******
   mpz_t t1;
   mpz_t t2; 
   mpz_init(t1);
   mpz_init(t2);
-    
+
   mpz_init(zero);
   mpz_init(x);
   mpz_init(y);
@@ -146,27 +147,35 @@ int euclide(mpz_t a, mpz_t p)
   mpz_init(v);
   
   mpz_init_set_ui(zero, 0);
-  mpz_init_set_ui(x, mpz_get_ui(a));
-  mpz_init_set_ui(y, mpz_get_ui(p));
+  mpz_set(x, a);
+  mpz_set(y, p);
+  //mpz_init_set_ui(x, mpz_get_ui(a));
+  //mpz_init_set_ui(y, mpz_get_ui(p));
 
   bezout(x, y, u, v, p, zero);
   printf("\n\n\nT1 : ");
 
-//  mpz_init_set_ui(t1, 0);
-  mpz_init_set_ui(t2, -23);
-  mpz_mod(t2,t2,p);
+  mpz_init_set_ui(t1, 0);
+  mpz_init_set_ui(t2, 0);
+  mpz_mod(t1,u,v);
   
   mpz_out_str(NULL, 10,t2);
 //*******
   mpz_init(uFinal);
   mpz_init(vFinal);
-  mpz_init_set_ui(uFinal, mpz_get_ui(u));
-  mpz_init_set_ui(vFinal, mpz_get_ui(v));
+
+  mpz_set(uFinal, u);
+  mpz_set(vFinal, v);
+  //mpz_init_set_ui(uFinal, mpz_get_ui(u));
+  //mpz_init_set_ui(vFinal, mpz_get_ui(v));
 
   mpz_clear(u);
   mpz_clear(v);
   mpz_clear(x);
   mpz_clear(y);
+
+  mpz_clear(t1);
+  mpz_clear(t2);
 
   return 0;
 }
