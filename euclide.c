@@ -1,5 +1,4 @@
 
-
 #include<stdio.h>
 #include<gmp.h>
 
@@ -12,11 +11,6 @@ mpz_t uFinal;
 mpz_t vFinal;
 //Variable reprensentant p
 mpz_t p_global;
-
-/*---------------------------------------------------------------------*/
-
-
-
 
 //Affichage de "a*u + b*v = p"
 void printauplusbv(mpz_t a, mpz_t u, mpz_t b, mpz_t v, mpz_t p) 
@@ -147,39 +141,11 @@ int euclide(mpz_t a, mpz_t ptmp)
   printf("\n\n\n inv_a : ");
   mpz_out_str(NULL, 10,inv_a);
 
-  //Nettoyage des variables mpz_t
+  //Liberation de la memeoire allouee aux variables
   mpz_clear(v);
   mpz_clear(x);
   mpz_clear(y);
   mpz_clear(inv_a);
 
-  return 0;
-}
-
-int main(int argc, char const *argv[])
-{
-
-  //Initialisation des variables de type mpz_t
-  mpz_t a;
-  mpz_t p;
-  mpz_inits(a,p,p_global,NULL);
-  //Affectation des valeurs
-  mpz_init_set_ui(a, 13);
-  mpz_init_set_ui(p, 60);
-  mpz_init_set_ui(p_global, 60);
-  euclide(a,p);
-
-
-  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
-  printf("\n\n\nUFINAL : ");
-  mpz_out_str(NULL, 10, uFinal);
-  printf("\n\n\nVFINAL : ");
-  mpz_out_str(NULL, 10, vFinal);
-  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
-
-  mpz_clear(a);
-  mpz_clear(p);
-  mpz_clear(uFinal);
-  mpz_clear(vFinal);
   return 0;
 }

@@ -6,7 +6,7 @@ OBJS = main.c euclide.c
 main: $(OBJS)
 	$(CC) -o main $(OBJS) $(CFLAGS) 
 
-main.o: main.c euclide.c
+main.o: $(OBJS)
 
 
 prime_genere: prime_genere.c

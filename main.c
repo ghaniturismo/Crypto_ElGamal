@@ -1,3 +1,4 @@
+
 #include "gmp.h"
 #include "main.h"
 #include "euclide.h"
@@ -12,9 +13,14 @@
 gmp_randstate_t state;
 gmp_randstate_t generator;
 
+//Declaration des variables globales
+//Variable representant la derniere valeur de u
 mpz_t uFinal;
+//Variable representant la derniere valeur de v
 mpz_t vFinal;
+//Variable reprensentant p
 mpz_t p_global;
+
 
 //generate a number of exactly k_bit
 void generate_number(mpz_t alea, unsigned int nbr_bit)
@@ -128,6 +134,18 @@ printf("expmod(19,1024,62) = %d\n", a1);
   mpz_init_set_ui(p1, 60);
   mpz_init_set_ui(p_global, 60);
   euclide(a,p1);
+
+  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+  printf("\n\n\nUFINAL : ");
+  mpz_out_str(NULL, 10, uFinal);
+  printf("\n\n\nVFINAL : ");
+  mpz_out_str(NULL, 10, vFinal);
+  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+
+  mpz_clear(a);
+  mpz_clear(p);
+  mpz_clear(uFinal);
+  mpz_clear(vFinal);
 //*********************************************************************************//
 return 0;
 }
