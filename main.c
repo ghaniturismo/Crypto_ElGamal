@@ -109,12 +109,9 @@ int main(int argc, char * argv[]){
     gmp_printf("msg alea number :%Zu \n",msg2);
 //---------------------------------------------------------------------------------//
 
-
 int a;
 a = expmod(432, 18, 765);
 printf("expmod(19,1024,62) = %d\n", a);
-
-
 
 return 0;
 }
