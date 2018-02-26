@@ -8,6 +8,7 @@
 
 mpz_t uFinal;
 mpz_t vFinal;
+mpz_t p_global;
 
 /*
   Affiche au + bv = p
@@ -122,23 +123,12 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
 
 /*---------------------------------------------------------------------*/
 
-int euclide(mpz_t a, mpz_t p)
+int euclide(mpz_t a, mpz_t ptmp)
 {
   
-  
-  mpz_t zero;
-  mpz_t x;
-  mpz_t y;
-  mpz_t u;
-  mpz_t v;
+  mpz_t zero,x,y,u,v,inv_a;
 
-  //mpz_mod(u,u,p);
-  
-  //******
-  mpz_t t1;
-  mpz_t t2; 
-  mpz_init(t1);
-  mpz_init(t2);
+  mpz_init(inv_a);
 
   mpz_init(zero);
   mpz_init(x);
@@ -148,34 +138,33 @@ int euclide(mpz_t a, mpz_t p)
   
   mpz_init_set_ui(zero, 0);
   mpz_set(x, a);
-  mpz_set(y, p);
+  mpz_set(y, ptmp);
   //mpz_init_set_ui(x, mpz_get_ui(a));
   //mpz_init_set_ui(y, mpz_get_ui(p));
 
-  bezout(x, y, u, v, p, zero);
-  printf("\n\n\nT1 : ");
+  bezout(x, y, u, v, ptmp, zero);
 
-  mpz_init_set_ui(t1, 0);
-  mpz_init_set_ui(t2, 0);
-  mpz_mod(t1,u,v);
+  mpz_init_set_ui(inv_a, 0);
   
-  mpz_out_str(NULL, 10,t2);
 //*******
   mpz_init(uFinal);
   mpz_init(vFinal);
 
+  //Affectation des derniers valeur de u et v
   mpz_set(uFinal, u);
   mpz_set(vFinal, v);
-  //mpz_init_set_ui(uFinal, mpz_get_ui(u));
-  //mpz_init_set_ui(vFinal, mpz_get_ui(v));
+
+  mpz_mod(inv_a,u,p_global);
+
+  printf("\n\n\n inv_a : ");
+  mpz_out_str(NULL, 10,inv_a);
 
   mpz_clear(u);
   mpz_clear(v);
   mpz_clear(x);
   mpz_clear(y);
 
-  mpz_clear(t1);
-  mpz_clear(t2);
+  mpz_clear(inv_a);
 
   return 0;
 }
@@ -186,11 +175,11 @@ int main(int argc, char const *argv[])
   //Initialisation des variables mpz
   mpz_t a;
   mpz_t p;
-  mpz_init(a);
-  mpz_init(p);
+  mpz_inits(a,p,p_global,NULL);
   //Affectation des valeurs
   mpz_init_set_ui(a, 13);
-  mpz_init_set_ui(p, 60) ;
+  mpz_init_set_ui(p, 60);
+  mpz_init_set_ui(p_global, 60);
   euclide(a,p);
 
   //mpz_t uFinal;

@@ -14,7 +14,11 @@ prime_genere: prime_genere.c
 
 prime_genere.o: prime_genere.c
 
+euclide: euclide.c
+	$(CC) -o euclide euclide.c $(CFLAGS) 
+
+euclide.o: euclide.c
 
 
 clean:
-	rm -f *~ *.o main prime_genere
+	rm -f *~ *.o main prime_genere euclide
