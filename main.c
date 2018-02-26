@@ -55,21 +55,22 @@ int expmod(int base, int exponent, int modulo) {
         return 0; //error when invalid args
     }
     
-    int result; // var for store result
-    int multiply; //base multiply
-    int mask; //mask for define bits state
-    int i; //loop counter
+    int result; // var pour stocké le resultat
+    int multiply; //base de multiplication
+    int mask; //mask pour definir les etats des bits.
+    int i;
     
     result = 1;
     multiply = base;
     mask = 1;
     
     for (i = 0; i < WORD_BIT; ++i) {
-        if (exponent & mask) { //if bit is set
+        if (exponent & mask) { //test si le bit est a 1 
+            printf("mask = %d\n",mask);
             result = (result * multiply) % modulo;         
         }
         multiply = (multiply * multiply) % modulo;
-        mask <<= 1; //shift mask bit
+        mask <<= 1; //decalage d'un bit
     }
     
     return result;
@@ -121,7 +122,7 @@ int main(int argc, char * argv[]){
 //---------------------------------------------------------------------------------//
 
 int a1;
-a1 = expmod(432, 18, 765);
+a1 = expmod(432, 5056, 765);
 printf("expmod(19,1024,62) = %d\n", a1);
 
 //*********************************************************************************//
