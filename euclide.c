@@ -138,8 +138,7 @@ int euclide(mpz_t a, mpz_t ptmp)
   mpz_mod(inv_a,u,p_global);
 
   //Affichage de l'inverse modulaire de a
-  printf("\n\n\n inv_a : ");
-  mpz_out_str(NULL, 10,inv_a);
+  gmp_printf("\n\n a^-1 mod p = %Zd ^-1 mod %Zd = %Zd \n", a ,p_global, inv_a);
 
   //Liberation de la memeoire allouee aux variables
   mpz_clear(v);

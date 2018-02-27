@@ -21,38 +21,13 @@ mpz_t vFinal;
 //Variable reprensentant p
 mpz_t p_global;
 
-//generate a number of exactly k_bit
-void generate_number(mpz_t alea, unsigned int nbr_bit)
-{
-    mpz_t k;
-    mpz_init(k);
-    mpz_ui_pow_ui(k,2,nbr_bit-1);
-    mpz_urandomb(alea, generator, nbr_bit-1);
-    mpz_add(alea,alea,k);
-    mpz_clear(k);
-}
-
-void generate_prime_number(mpz_t alea, unsigned int nbr_bit)
-{
-    int prime;
-    mpz_t k;
-    mpz_init(k);
-    mpz_ui_pow_ui(k,2,nbr_bit-1);
-    do
-    {
-        mpz_urandomb(alea, generator, nbr_bit-1);
-        mpz_add(alea,alea,k);
-        prime = mpz_probab_prime_p(alea,10);
-    }while(prime==0);
-    mpz_clear(k);
-}
 
 /*
  * Calcule de A ≡ g^a mod p de la question 4
  * stockage du resultat de g^a mod p dans  la variable res 
  * initialiser r avant l'appel à la fonction
  */
-void expMod(mpz_t res, mpz_t p, mpz_t g, mpz_t a){
+void expMod(mpz_t res, mpz_t g, mpz_t a, mpz_t p){
   
     mpz_t quotient, rest, r0, r1, r2, r3, aTmp;
     mpz_inits(quotient, rest, r0, r1, r2, r3, aTmp, (void *)NULL);
@@ -73,7 +48,7 @@ void expMod(mpz_t res, mpz_t p, mpz_t g, mpz_t a){
                 //mod p
                 mpz_mod(r1, r0, p);
                 //expMod(r0, p, g, 2);
-                expMod(res, p, r1, quotient);
+                expMod(res, r1,quotient, p);
             }else{
                 //expmod((g × puissance(g^2 mod p , (a − 1)/2) )mod p)
                 //g^2
@@ -84,7 +59,7 @@ void expMod(mpz_t res, mpz_t p, mpz_t g, mpz_t a){
                 mpz_sub_ui(aTmp, a, 1);
                 mpz_tdiv_q_ui(quotient, aTmp, 2);
 
-                expMod(r2, p, r1, quotient);
+                expMod(r2, r1, quotient, p);
 
                 mpz_mul(r3, r2, g);
                 mpz_mod(res, r3, p);
@@ -94,19 +69,43 @@ void expMod(mpz_t res, mpz_t p, mpz_t g, mpz_t a){
 }
 
 /*
-    main
+ *KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
+ *p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
+ *X ≡ g x mod p. Elle renvoie en sortie x et X.
 */
+void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
 
-int main(int argc, char * argv[]){
-    
-    mpz_t g,p;
-    mpz_t x,y,y1;
+    gmp_randstate_t state;
 
-     // init random state
+    // init random state
     gmp_randinit_mt(state);
     gmp_randseed_ui(state, time(NULL));
 
-    mpz_inits(x,y,y1,NULL);
+    //gmp_randseed_ui(state, 123987);
+    
+    //Generation de x la cle privée 
+    mpz_urandomm(x, state, p);
+    //mpz_add_ui(x, x, 2);
+
+    // calcule du grand X ≡ g^x mod p --> 1eme methode
+    expMod(grand_X, g, x, p);
+    gmp_printf("===publicKeyOfA grand_X ===\n%Zd\n", grand_X);
+
+    // calcule du grand X ≡ g^x mod p --> 2eme methode
+    // mpz_powm(grand_X, g, x, p);   
+    // gmp_printf("===publicKeyOfA grand_X ===\n%Zd\n", grand_X);
+}
+
+
+/*
+    main
+*/
+int main(int argc, char * argv[]){
+    
+    mpz_t g,p;
+    mpz_t x,grand_X,y1;
+
+    mpz_inits(x,grand_X,y1,NULL);
 
     // G initialization
     mpz_init(g);
@@ -118,42 +117,11 @@ int main(int argc, char * argv[]){
     mpz_set_str(p, P_VAL_HEXA, 16);
     gmp_printf("p en 1024 bit rfc2409 = \n%Zd \n", p);
     
-    //Generation de x la cle privée 
-    mpz_urandomm(x, state, p);
-    gmp_printf("x = \n%Zd  \n", x);
-
-    // calcule de la cle public 1eme methode
-    expMod(y, p, g, x);
-    gmp_printf("===publicKeyOfA y ===\n%Zd\n", y);
-
-    // calcule de la cle public 2eme methode
-    mpz_powm(y1, g, x, p);   
-    gmp_printf("===publicKeyOfA y1 ===\n%Zd\n", y1);
-
-
-
-//---------------------------------------------------------------------------------//
-  	// int n;
-   //  gmp_randinit_default(generator);    
-   //  //msg to encrypt
-   //  mpz_t msg1,msg2;
-   //  mpz_inits(msg1,msg2, NULL);
-   //  generate_number(msg1,16);
-   //  generate_prime_number(msg2,16);
-   //  gmp_printf("msg number :%Zu \n",msg1);
-   //  gmp_printf("msg alea number :%Zu \n",msg2);
-//---------------------------------------------------------------------------------//
-
-  mpz_t res,v,m,p10;
-  mpz_inits(res,v, m, p10,NULL);
-  mpz_set_ui(v, 19);
-  mpz_set_ui(m, 152457);
-  mpz_set_ui(p10, 62);
+    //avoir Kp=(p,g,X), Ks=(x) 
+    keyGen(p,g,grand_X,x);
   
-  expMod(res, p10, v, m);
-  printf("Mr expmod = \n");
-  mpz_out_str(NULL, 10, res);
-  printf("\n");
+
+
 
 //*********************************************************************************//
   //Initialisation des variables mpz
@@ -166,19 +134,22 @@ int main(int argc, char * argv[]){
   mpz_init_set_ui(p_global, 60);
   euclide(a,p1);
 
-  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
-  printf("\n\n\nUFINAL : ");
-  mpz_out_str(NULL, 10, uFinal);
-  printf("\n\n\nVFINAL : ");
-  mpz_out_str(NULL, 10, vFinal);
-  printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+  // printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
+  // printf("\n\n\nUFINAL : ");
+  // mpz_out_str(NULL, 10, uFinal);
+  // printf("\n\n\nVFINAL : ");
+  // mpz_out_str(NULL, 10, vFinal);
+  // printf("\n\n\n*****lalalalalalalalalalalalalalala*****\n");
 
+//*********************************************************************************//
+ 
   mpz_clear(a);
   mpz_clear(p);
   mpz_clear(uFinal);
   mpz_clear(vFinal);
   mpz_clear(x);
   mpz_clear(g);
-//*********************************************************************************//
+  mpz_clear(p_global);
+
 return 0;
 }
