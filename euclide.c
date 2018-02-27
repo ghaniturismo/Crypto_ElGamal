@@ -70,8 +70,8 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
       mpz_set(pgcd, a);
       mpz_set_ui(u, 1);
       mpz_set(v, lastV);
-      printf("---------------------------------------------\n");      
-      printauplusbv(a, u, b, v, pgcd);
+      //printf("---------------------------------------------\n");      
+      //printauplusbv(a, u, b, v, pgcd);
     }
   else
     {
@@ -86,13 +86,13 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
       mpz_init(vRec);
       mpz_init(vFoisQuotient);
       mpz_tdiv_qr(quotient, reste, a, b);
-      printdivision(a, b, quotient, reste);
+      //printdivision(a, b, quotient, reste);
       bezout(b, reste, uRec, vRec, pgcd, lastV);      
-      printbuplusamoinsbqv(b, uRec, a, quotient, vRec, pgcd);
+      //printbuplusamoinsbqv(b, uRec, a, quotient, vRec, pgcd);
       mpz_set(u, vRec);
       mpz_mul(vFoisQuotient, vRec, quotient);
       mpz_sub(v, uRec, vFoisQuotient);
-      printauplusbv(a, u, b, v, pgcd);
+      //printauplusbv(a, u, b, v, pgcd);
       mpz_clear(quotient);
       mpz_clear(reste);
       mpz_clear(uRec);
