@@ -169,8 +169,8 @@ void decrypt(mpz_t grand_C, mpz_t grand_B, mpz_t x, mpz_t p) {
 
 	/* RESTE A FAIRE
 		Bob retrouve ainsi m car
-	∗ D = B x ≡ g xr ≡ (g x ) r ≡ X r ≡ y mod p et
-	∗ C × (D) −1 ≡ m × y × (y) −1 ≡ m mod p
+	∗ D = B^x ≡ g^xr ≡ (g^x)^r ≡ X^r ≡ y mod p et
+	∗ C × (D)^−1 ≡ m × y × (y)^−1 ≡ m mod p
 	*/
 }
 
