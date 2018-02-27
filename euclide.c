@@ -104,7 +104,7 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
 //Fonction euclide
 //Recuperation des coefficients u et v (a partir de a et p) 
 //et affectation dans uFinal et vFinal (variables globales)
-int euclide(mpz_t a, mpz_t ptmp)
+void euclide(mpz_t a, mpz_t ptmp)
 {
  
   //Initialisation des variables de type mpz_t
@@ -138,7 +138,7 @@ int euclide(mpz_t a, mpz_t ptmp)
   mpz_mod(inv_a,u,p_global);
 
   //Affichage de l'inverse modulaire de a
-  gmp_printf("\n\n a^-1 mod p = %Zd ^-1 mod %Zd = %Zd \n", a ,p_global, inv_a);
+  gmp_printf("\n\n a^-1 mod p = \n%Zd ^-1\nmod %Zd =\n%Zd \n", a ,p_global, inv_a);
 
   //Liberation de la memeoire allouee aux variables
   mpz_clear(v);
@@ -146,5 +146,5 @@ int euclide(mpz_t a, mpz_t ptmp)
   mpz_clear(y);
   mpz_clear(inv_a);
 
-  return 0;
+  //return 1;
 }
