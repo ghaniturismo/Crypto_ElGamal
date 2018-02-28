@@ -139,7 +139,7 @@ void euclide(mpz_t u, mpz_t v, mpz_t a, mpz_t ptmp){
     mpz_mod(inv_a,u,ptmp);
 
     //Affichage de l'inverse modulaire de a
-    gmp_printf("\n\n a^-1 mod p = \n%Zd ^-1\nmod %Zd =\n%Zd \n", a ,ptmp, inv_a);
+    //gmp_printf("\n\n a^-1 mod p = \n%Zd ^-1\nmod %Zd =\n%Zd \n", a ,ptmp, inv_a);
 
     //Liberation de la memeoire allouee aux variables
     mpz_clear(x);
