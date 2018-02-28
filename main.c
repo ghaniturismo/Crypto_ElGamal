@@ -64,6 +64,31 @@ void expMod(mpz_t res, mpz_t g, mpz_t a, mpz_t p){
     }
 }
 
+
+//Méthode retournant le nombre de lignes dans un fichier fp
+int countlines(FILE *fp)
+{
+  //char * str;
+  //asprintf(&str,"%s",filename);
+  // count the number of lines in the file called filename                                    
+  //FILE *fp = fopen(filename,"r");
+  int ch=0;
+  int lines=0;
+
+  if (fp == NULL);
+  return 0;
+
+  lines++;
+  while ((ch = fgetc(fp)) != EOF)
+    {
+      if (ch == '\n')
+    lines++;
+    }
+  //fclose(fp);
+  return lines;
+}
+
+
 /*
  *KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
  *p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
@@ -88,7 +113,7 @@ void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
  * g^r mod p) en prenant en entrée la clé publique de Bob K p = (p, g, X) et un message m
  * avec y ≡ X^r mod p et r alea.
  */
-void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t msg_chiffre) {
+void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t msg_chiffre, FILE* file_r) {
 	
     //Initialisation des variables
 	mpz_t r, y;
@@ -96,9 +121,51 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
    
     //generation de r aleatoire 
     mpz_urandomm(r, state, p);
-    
-    //------------FAIRE UNE LISTE POUR DIFFERENCIER CHAQUE R---------//
 
+    
+    //------------Fichier pour differencier les r--------------------//
+    char * c1 = NULL;//[1024];//recupere les lignes du fichier
+    char c2[1024];//recupere r en char*
+ 	int nbLines; //recupere le nombre de ligne du fichier file_r
+ 	nbLines = countlines(file_r);
+    //gmp_fprintf(file_r,"%Zd\n", r);
+
+
+   	char *line = NULL;
+	size_t len = 0;
+	size_t read;
+ 
+ /*
+	while ((read = getline(&line, &len, file_r)) != -1) {
+		printf("Retrieved line of length %zu :\n", read);
+		printf("%s", line);
+		printf("********************\n");
+	}*/
+
+	//A FAIRE : GERER LA CONDITION DE LA BOUCLE + GARDER ANCIENNE VALEURS
+    int i;
+    i = 0;
+    //parcourt de toutes les lignes du fichier
+    while (i<=nbLines) {
+    	// reads text until newline
+    	read = getline(&c1, &len, file_r);
+    	//fgets(c1, 1024, file_r);
+    	//fscanf(file_r,"%[\n]", c1);//recuperation de la ligne i
+    	mpz_get_str(c2, 10, r);	//recuperation de r en char*
+    	//si c (ligne i) == r, relancer
+    	if (c1 == c2) {
+    		mpz_urandomm(r, state, p);
+    		i = 0;
+    	} else { //sinon, ecrire l alea r dans le fichier
+    		gmp_fprintf(file_r,"%Zd\n", r); //ecriture de r dans le fichier
+	    	i++;
+    	}	
+    }
+    //affichage terminal du r
+    printf("\nData from the file c1:\n%s\n", c1);
+    printf("\nData from the file c2:\n%s\n", c2);
+
+    //---------------------------------------------------------------//
 	//------Calcul de y (y = X^r mod p)
 	expMod(y, grand_X, r, p);
 	//gmp_printf("y : \n%Zd", y);
@@ -140,6 +207,9 @@ void decrypt(mpz_t msg_dechiffre, mpz_t grand_C, mpz_t grand_B, mpz_t x) {
     mpz_clears(u,v,grand_D,NULL);
 }
 
+
+
+
 /*
  *  main
  */
@@ -167,7 +237,7 @@ int main(int argc, char * argv[]){
     //     printf("\nImpossible d'ouvrir le fichier test.txt\n");
     // }
     /*----------------------------------------------------------*/
-   
+    //--------File test.txt----------------/
     FILE* f = NULL;
     char *new_str;
     //char *new_str1;
@@ -186,6 +256,24 @@ int main(int argc, char * argv[]){
         f = fopen(new_str, "a+");
     }
 
+    //-----File r.txt----------------/
+    FILE* file_r = NULL;
+    char *new_str2;
+    //char *new_str1;
+    asprintf(&new_str2,"%s","r.txt");
+    file_r = fopen(new_str2, "r");
+    remove("r.txt");
+    if (file_r == NULL)
+    {
+        file_r = fopen(new_str2, "a+");
+        //fprintf(f,"%-15s  |%-15s  |%-15s  |\n\n","keyLength", "encrypt(ms)","decrypt(ms)");
+        //fprintf(f,"-----------KeyGen----------- \n");
+    }
+    else
+    {
+        fclose(file_r);
+        file_r = fopen(new_str2, "a+");
+    }
 
     mpz_t g,p;
     mpz_t x,grand_X;
@@ -230,7 +318,7 @@ int main(int argc, char * argv[]){
 
     fprintf(f,"-----------Chiffrement du message----------- \n");
     gmp_fprintf(f,"message =   %Zd  \n\n", msg_Entre);
-  	encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre);
+  	encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre, file_r);
 
     fprintf(f,"-----------Dechiffrement du message----------- \n");
   	decrypt(msg_Sortie,grand_C, grand_B, x); 
@@ -239,6 +327,7 @@ int main(int argc, char * argv[]){
 
     fclose(f);
 
+    //fclose(file_r);
     // CLEAN
     mpz_clear(p);
     mpz_clear(x);
