@@ -34,6 +34,7 @@ void expMod(mpz_t res, mpz_t g, mpz_t a, mpz_t p){
     mpz_tdiv_qr_ui(quotient, rest, a, 2);
 
     mpz_set(aTmp,a);
+		
 
     if(mpz_sgn(a) == 0){
         mpz_set_ui(res, 1);
@@ -122,8 +123,8 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
         }
         gmp_fprintf(file_r,"%Zd\n", r); 
     }
+    
     fclose(file_r);
-
 
     //---------------------------------------------------------------//
 	//------Calcul de y (y = X^r mod p)
@@ -239,53 +240,65 @@ int main(int argc, char * argv[]){
     mpz_t grand_B, grand_C;
     mpz_t msg_Entre,msg_Sortie;
 
-    //char* plain = "salut";
+    //Test des 5 occurences
+    //boucle sur i
+    int i;
+    for( i=0; i<5; i++) {
+    	fprintf(f,"----------------------TEST %d---------------------- \n", i+1);
+    	gmp_randinit_mt(state);
+    	gmp_randseed_ui(state, time(NULL));
+		mpz_init(msg_Entre);
+		mpz_set_ui(msg_Entre, 19101494);
+		//mpz_init_set_str(msg_Entre, plain, 16);
+		gmp_printf("\nmsg_Entre --> %Zd\n",msg_Entre);
+		mpz_inits(x,grand_X, msg_Sortie,NULL);
+		mpz_inits(grand_C, grand_B,NULL);
+		// G initialization
+		mpz_init(g);
+		mpz_set_ui(g, 2);
+		// P initialization
+		mpz_init(p);
+		mpz_set_str(p, P_VAL_HEXA, 16);
+		//affectation de la valeur de p a p_global
+		mpz_set(p_global, p); 
+		//avoir Kp=(p,g,X), Ks=(x)
+		keyGen(p,g,grand_X,x);
+		//Ecriture dans le fichier de Kp et Ks
+		fprintf(f,"-----------KeyGen----------- \n");
+		fprintf(f,"-----------Cle publique Kp----------- \n");
+		gmp_fprintf(f,"p = \n%Zd  \n\n", p);
+		gmp_fprintf(f,"g = \n%Zd  \n\n", g);
+		gmp_fprintf(f,"X = \n%Zd  \n\n", grand_X);
+		fprintf(f,"-----------Cle privee Ks----------- \n");
+		gmp_fprintf(f,"x = \n%Zd  \n\n", x);
+		fprintf(f,"-----------Chiffrement du message----------- \n");
+		gmp_fprintf(f,"message =   %Zd  \n\n", msg_Entre);
 
-    mpz_init(msg_Entre);
-    mpz_set_ui(msg_Entre, 19101494);
-    //mpz_init_set_str(msg_Entre, plain, 16);
+		encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre, file_r);
 
+		fprintf(f,"-----------Dechiffrement du message----------- \n");
 
-    gmp_printf("\nmsg_Entre --> %Zd\n",msg_Entre);
+		decrypt(msg_Sortie,grand_C, grand_B, x);
 
-    mpz_inits(x,grand_X, msg_Sortie,NULL);
-    mpz_inits(grand_C, grand_B,NULL);
+		gmp_fprintf(f,"message =   %Zd  \n\n", msg_Sortie);
+		gmp_printf("message =   %Zd  \n\n", msg_Sortie);
+	}
 
-    // G initialization
-    mpz_init(g);
-    mpz_set_ui(g, 2);
+	/*char chaine1[TAILLE_MAX] = "";
+	file_r = fopen(new_str2, "a+");
+    if (f != NULL)
+    {
+    	printf("***********1\n");
+        while (fgets(chaine1, TAILLE_MAX, file_r) != NULL) // On lit le fichier tant qu'on ne reçoit pas d'erreur (NULL)
+        {
+        	printf("*************2\n");
+          gmp_fprintf(f,"%Zd\n", chaine1); 
+        }
+        //gmp_fprintf(file_r,"%Zd\n", r); 
+    }*/
 
-    // P initialization
-    mpz_init(p);
-    mpz_set_str(p, P_VAL_HEXA, 16);
-    
-    //affectation de la valeur de p a p_global
-    mpz_set(p_global, p); 
-        
-    //avoir Kp=(p,g,X), Ks=(x) 
-  	keyGen(p,g,grand_X,x);
-
-    //Ecriture dans le fichier de Kp et Ks
-    fprintf(f,"-----------KeyGen----------- \n");
-    fprintf(f,"-----------Cle publique Kp----------- \n");
-    gmp_fprintf(f,"p = \n%Zd  \n\n", p);
-    gmp_fprintf(f,"g = \n%Zd  \n\n", g);
-    gmp_fprintf(f,"X = \n%Zd  \n\n", grand_X);
-
-    fprintf(f,"-----------Cle privee Ks----------- \n");
-    gmp_fprintf(f,"x = \n%Zd  \n\n", x);
-
-    fprintf(f,"-----------Chiffrement du message----------- \n");
-    gmp_fprintf(f,"message =   %Zd  \n\n", msg_Entre);
-  	encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre, file_r);
-
-    fprintf(f,"-----------Dechiffrement du message----------- \n");
-  	decrypt(msg_Sortie,grand_C, grand_B, x); 
-    gmp_fprintf(f,"message =   %Zd  \n\n", msg_Sortie);
-    gmp_printf("message =   %Zd  \n\n", msg_Sortie);
-
-    fclose(f);
-
+	fclose(f);
+	fclose(file_r);
     //fclose(file_r);
     // CLEAN
     mpz_clear(p);
