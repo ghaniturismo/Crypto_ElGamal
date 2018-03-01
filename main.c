@@ -8,6 +8,10 @@
 #include <assert.h>
 #include <limits.h>
 #include <time.h>
+#include <string.h>
+
+#define TAILLE_MAX 1024
+
 
 //#define WORD_BIT (sizeof(int) * CHAR_BIT)
 
@@ -64,31 +68,6 @@ void expMod(mpz_t res, mpz_t g, mpz_t a, mpz_t p){
     }
 }
 
-
-//Méthode retournant le nombre de lignes dans un fichier fp
-int countlines(FILE *fp)
-{
-  //char * str;
-  //asprintf(&str,"%s",filename);
-  // count the number of lines in the file called filename                                    
-  //FILE *fp = fopen(filename,"r");
-  int ch=0;
-  int lines=0;
-
-  if (fp == NULL);
-  return 0;
-
-  lines++;
-  while ((ch = fgetc(fp)) != EOF)
-    {
-      if (ch == '\n')
-    lines++;
-    }
-  //fclose(fp);
-  return lines;
-}
-
-
 /*
  *KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
  *p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
@@ -117,53 +96,34 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
 	
     //Initialisation des variables
 	mpz_t r, y;
-	mpz_inits(r, y, NULL);
-   
+
+    char chaine[TAILLE_MAX] = "";
+    char c[TAILLE_MAX] = "";
+	
+    mpz_inits(r, y, NULL);
+
     //generation de r aleatoire 
     mpz_urandomm(r, state, p);
 
-    
-    //------------Fichier pour differencier les r--------------------//
-    char * c1 = NULL;//[1024];//recupere les lignes du fichier
-    char c2[1024];//recupere r en char*
- 	int nbLines; //recupere le nombre de ligne du fichier file_r
- 	nbLines = countlines(file_r);
-    //gmp_fprintf(file_r,"%Zd\n", r);
-
-
-   	char *line = NULL;
-	size_t len = 0;
-	size_t read;
+    mpz_get_str(c,10,r);
  
- /*
-	while ((read = getline(&line, &len, file_r)) != -1) {
-		printf("Retrieved line of length %zu :\n", read);
-		printf("%s", line);
-		printf("********************\n");
-	}*/
-
-	//A FAIRE : GERER LA CONDITION DE LA BOUCLE + GARDER ANCIENNE VALEURS
-    int i;
-    i = 0;
-    //parcourt de toutes les lignes du fichier
-    while (i<=nbLines) {
-    	// reads text until newline
-    	read = getline(&c1, &len, file_r);
-    	//fgets(c1, 1024, file_r);
-    	//fscanf(file_r,"%[\n]", c1);//recuperation de la ligne i
-    	mpz_get_str(c2, 10, r);	//recuperation de r en char*
-    	//si c (ligne i) == r, relancer
-    	if (c1 == c2) {
-    		mpz_urandomm(r, state, p);
-    		i = 0;
-    	} else { //sinon, ecrire l alea r dans le fichier
-    		gmp_fprintf(file_r,"%Zd\n", r); //ecriture de r dans le fichier
-	    	i++;
-    	}	
+    file_r = fopen("r.txt", "a+");
+    int sam;
+    if (file_r != NULL)
+    {
+        while (fgets(chaine, TAILLE_MAX, file_r) != NULL) // On lit le fichier tant qu'on ne reçoit pas d'erreur (NULL)
+        {
+            sam=strcmp(chaine,c);
+            if(sam == 10){
+                mpz_urandomm(r, state, p);
+                mpz_get_str(c,10,r);
+                rewind(file_r);//: remet le curseur au début du fichier    
+            }
+        }
+        gmp_fprintf(file_r,"%Zd\n", r); 
     }
-    //affichage terminal du r
-    printf("\nData from the file c1:\n%s\n", c1);
-    printf("\nData from the file c2:\n%s\n", c2);
+    fclose(file_r);
+
 
     //---------------------------------------------------------------//
 	//------Calcul de y (y = X^r mod p)
@@ -196,7 +156,7 @@ void decrypt(mpz_t msg_dechiffre, mpz_t grand_C, mpz_t grand_B, mpz_t x) {
 	expMod(grand_D, grand_B, x, p_global);
 
 	//------Calcul de C*D^-1 mod p = m mod p --> d'ou le resultat de m
-    // D^-1 est apres appel a euclide c'est u.
+    // D^-1 on le trouve apres l appel de euclide qu'on trouve le resultat dans u.
     euclide(u, v, grand_D, p_global);
 
     //m = C × D^−1 mod p.
@@ -262,7 +222,6 @@ int main(int argc, char * argv[]){
     //char *new_str1;
     asprintf(&new_str2,"%s","r.txt");
     file_r = fopen(new_str2, "r");
-    remove("r.txt");
     if (file_r == NULL)
     {
         file_r = fopen(new_str2, "a+");

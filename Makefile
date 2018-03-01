@@ -8,17 +8,5 @@ main: $(OBJS)
 
 main.o: $(OBJS)
 
-
-prime_genere: prime_genere.c
-	$(CC) -o prime_genere prime_genere.c $(CFLAGS) 
-
-prime_genere.o: prime_genere.c
-
-euclide: euclide.c
-	$(CC) -o euclide euclide.c $(CFLAGS) 
-
-euclide.o: euclide.c
-
-
 clean:
-	rm -f *~ *.o main prime_genere euclide
+	rm -f *~ *.o main 
