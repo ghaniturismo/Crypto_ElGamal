@@ -11,6 +11,7 @@
 #include <string.h>
 
 #define TAILLE_MAX 1024
+//#define RAND_MAX 32767
 
 
 //#define WORD_BIT (sizeof(int) * CHAR_BIT)
@@ -168,8 +169,14 @@ void decrypt(mpz_t msg_dechiffre, mpz_t grand_C, mpz_t grand_B, mpz_t x) {
     mpz_clears(u,v,grand_D,NULL);
 }
 
+//Méthode renvoyant un int aléatoire compris entre a et b
+// On suppose a<b
 
-
+int rand_a_b(int a, int b) {
+	int res;
+	res = rand()%(b-a)+a;
+	return res;
+}
 
 /*
  *  main
@@ -177,8 +184,8 @@ void decrypt(mpz_t msg_dechiffre, mpz_t grand_C, mpz_t grand_B, mpz_t x) {
 int main(int argc, char * argv[]){
     
     // init random state
-    gmp_randinit_mt(state);
-    gmp_randseed_ui(state, time(NULL));
+    //gmp_randinit_mt(state);
+    //gmp_randseed_ui(state, time(NULL));
     //gmp_randseed_ui(state, 123987);
 
     /*------------FILE READER-----------------------------------*/
@@ -220,14 +227,11 @@ int main(int argc, char * argv[]){
     //-----File r.txt----------------/
     FILE* file_r = NULL;
     char *new_str2;
-    //char *new_str1;
     asprintf(&new_str2,"%s","r.txt");
     file_r = fopen(new_str2, "r");
     if (file_r == NULL)
     {
         file_r = fopen(new_str2, "a+");
-        //fprintf(f,"%-15s  |%-15s  |%-15s  |\n\n","keyLength", "encrypt(ms)","decrypt(ms)");
-        //fprintf(f,"-----------KeyGen----------- \n");
     }
     else
     {
@@ -240,17 +244,24 @@ int main(int argc, char * argv[]){
     mpz_t grand_B, grand_C;
     mpz_t msg_Entre,msg_Sortie;
 
+    //Initialisation de l'aleatoire (plus fiable en utilisant srand())
+    srand(time(NULL));
+    //initialisation de la borne minimum aleatoire
+    int rand_min = rand();
     //Test des 5 occurences
     //boucle sur i
     int i;
     for( i=0; i<5; i++) {
-    	fprintf(f,"----------------------TEST %d---------------------- \n", i+1);
+    	fprintf(f,"---------------------------TEST %d---------------------------\n\n\n", i+1);
+    	//initialisation de l etat, utile pour le random gmp
     	gmp_randinit_mt(state);
     	gmp_randseed_ui(state, time(NULL));
 		mpz_init(msg_Entre);
-		mpz_set_ui(msg_Entre, 19101494);
+		int message_int;
+		message_int = rand_a_b(rand_min, RAND_MAX); //message aleatoire entre rand_min et RAND_MAX
+		mpz_set_ui(msg_Entre, message_int);
 		//mpz_init_set_str(msg_Entre, plain, 16);
-		gmp_printf("\nmsg_Entre --> %Zd\n",msg_Entre);
+		gmp_printf("\nmessage entre  --> %Zd\n",msg_Entre);
 		mpz_inits(x,grand_X, msg_Sortie,NULL);
 		mpz_inits(grand_C, grand_B,NULL);
 		// G initialization
@@ -264,42 +275,40 @@ int main(int argc, char * argv[]){
 		//avoir Kp=(p,g,X), Ks=(x)
 		keyGen(p,g,grand_X,x);
 		//Ecriture dans le fichier de Kp et Ks
-		fprintf(f,"-----------KeyGen----------- \n");
-		fprintf(f,"-----------Cle publique Kp----------- \n");
+		fprintf(f,"------------------------KeyGen------------------------\n");
+		fprintf(f,"--------------------Cle publique Kp--------------------\n");
 		gmp_fprintf(f,"p = \n%Zd  \n\n", p);
-		gmp_fprintf(f,"g = \n%Zd  \n\n", g);
+		gmp_fprintf(f,"g = %Zd  \n\n", g);
 		gmp_fprintf(f,"X = \n%Zd  \n\n", grand_X);
-		fprintf(f,"-----------Cle privee Ks----------- \n");
+		fprintf(f,"---------------------Cle privee Ks---------------------\n");
 		gmp_fprintf(f,"x = \n%Zd  \n\n", x);
-		fprintf(f,"-----------Chiffrement du message----------- \n");
-		gmp_fprintf(f,"message =   %Zd  \n\n", msg_Entre);
+		fprintf(f,"----------------Chiffrement du message----------------\n");
+		gmp_fprintf(f,"message entre  --> %Zd\n\n", msg_Entre);
 
 		encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre, file_r);
 
-		fprintf(f,"-----------Dechiffrement du message----------- \n");
+		fprintf(f,"---------------Dechiffrement du message---------------\n");
 
 		decrypt(msg_Sortie,grand_C, grand_B, x);
 
-		gmp_fprintf(f,"message =   %Zd  \n\n", msg_Sortie);
-		gmp_printf("message =   %Zd  \n\n", msg_Sortie);
+		gmp_fprintf(f,"message sortie --> %Zd  \n\n", msg_Sortie);
+		gmp_printf("message sorite --> %Zd  \n\n", msg_Sortie);
 	}
 
-	/*char chaine1[TAILLE_MAX] = "";
-	file_r = fopen(new_str2, "a+");
+
+	//Affichage des aléas r dans le fichier test.txt
+	char chaine1[TAILLE_MAX] = "";
+    fprintf(f, "\n\n\n\n---------------------LISTE DES ALEA R---------------------\n\n");
     if (f != NULL)
     {
-    	printf("***********1\n");
         while (fgets(chaine1, TAILLE_MAX, file_r) != NULL) // On lit le fichier tant qu'on ne reçoit pas d'erreur (NULL)
         {
-        	printf("*************2\n");
-          gmp_fprintf(f,"%Zd\n", chaine1); 
+          fprintf(f,"\n%s\n", chaine1); //affichage de chaque ligne du fichier r.txt dans test.txt
         }
-        //gmp_fprintf(file_r,"%Zd\n", r); 
-    }*/
+    }
 
 	fclose(f);
 	fclose(file_r);
-    //fclose(file_r);
     // CLEAN
     mpz_clear(p);
     mpz_clear(x);
@@ -309,5 +318,5 @@ int main(int argc, char * argv[]){
     mpz_clear(grand_B);
     mpz_clear(grand_C);
 
-return 0;
+	return 0;
 }
