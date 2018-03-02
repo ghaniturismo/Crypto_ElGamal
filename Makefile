@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -lgmpxx -lgmp
 
-OBJS = main.c euclide.c
+OBJS = main.c euclide.c expmod.c
 
 main: $(OBJS)
 	$(CC) -o main $(OBJS) $(CFLAGS) 

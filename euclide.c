@@ -2,15 +2,6 @@
 #include<stdio.h>
 #include<gmp.h>
 
-/*---------------------------------------------------------------------*/
-
-//Declaration des variables globales
-//Variable representant la derniere valeur de u
-mpz_t uFinal;
-//Variable representant la derniere valeur de v
-mpz_t vFinal;
-
-
 //Affichage de "a*u + b*v = p"
 void printauplusbv(mpz_t a, mpz_t u, mpz_t b, mpz_t v, mpz_t p) 
 {
@@ -61,7 +52,9 @@ void printdivision(mpz_t a, mpz_t b, mpz_t q, mpz_t r)
       printf("\n");
 }
 
-//Calcul des coefficients de Bezout u e v tels que a*u + b*v = pgcd de a et b
+/*
+ * Calcul des coefficients de Bezout u e v tels que a*u + b*v = pgcd de a et b
+ */
 void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
 {
   mpz_t pgcd_tmp;
@@ -78,16 +71,9 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
     }
   else
     {
-      mpz_t quotient;
-      mpz_t reste;
-      mpz_t uRec;
-      mpz_t vRec;
-      mpz_t vFoisQuotient;
-      mpz_init(quotient);
-      mpz_init(reste);
-      mpz_init(uRec);
-      mpz_init(vRec);
-      mpz_init(vFoisQuotient);
+      mpz_t quotient, reste, uRec, vRec, vFoisQuotient;
+      mpz_inits(quotient, reste, uRec, vRec, vFoisQuotient,NULL);
+
       mpz_tdiv_qr(quotient, reste, a, b);
       //printdivision(a, b, quotient, reste);
       bezout(b, reste, uRec, vRec, pgcd_tmp, lastV);      
@@ -96,26 +82,20 @@ void bezout(mpz_t a, mpz_t b, mpz_t u, mpz_t v, mpz_t pgcd, mpz_t lastV)
       mpz_mul(vFoisQuotient, vRec, quotient);
       mpz_sub(v, uRec, vFoisQuotient);
       //printauplusbv(a, u, b, v, pgcd_tmp);
-      mpz_clear(quotient);
-      mpz_clear(reste);
-      mpz_clear(uRec);
-      mpz_clear(vRec);
-      mpz_clear(vFoisQuotient);
-      mpz_clear(pgcd_tmp);
+      mpz_clears(quotient, reste, uRec, vRec, vFoisQuotient, pgcd_tmp, NULL);
     }
 }
 
-//Fonction euclide
-//Recuperation des coefficients u et v (a partir de a et p) 
-//et affectation dans uFinal et vFinal (variables globales)
+/* 
+ * Fonction euclide
+ * Recuperation des coefficients u et v (a partir de a et p) 
+ */
 void euclide(mpz_t u, mpz_t v, mpz_t a, mpz_t ptmp){
  
     //Initialisation des variables de type mpz_t
     mpz_t zero,x,y,inv_a;
-    mpz_init(inv_a);
-    mpz_init(zero);
-    mpz_init(x);
-    mpz_init(y);
+    mpz_inits(inv_a,zero,x,y,NULL);
+
     //Affectation des valeurs aux variables correcpondantes
     mpz_init_set_ui(zero, 0);
     mpz_set(x, a);
@@ -126,23 +106,14 @@ void euclide(mpz_t u, mpz_t v, mpz_t a, mpz_t ptmp){
 
     //Initialisation de l inverse modulaire de a
     mpz_init_set_ui(inv_a, 0);
-    //Initialisation de uFinal et vFinal
-    mpz_init(uFinal);
-    mpz_init(vFinal);
-
-    //Affectation des dernieres valeurs de u et v à uFinal et vFinal
-    mpz_set(uFinal, u);
-    mpz_set(vFinal, v);
 
     //Calcul de l inverse modulaire de a
     //affectation de u mod p  a inv_a
     mpz_mod(inv_a,u,ptmp);
 
-    //Affichage de l'inverse modulaire de a
-    //gmp_printf("\n\n a^-1 mod p = \n%Zd ^-1\nmod %Zd =\n%Zd \n", a ,ptmp, inv_a);
+      //Affichage de l'inverse modulaire de a
+      //gmp_printf("\n\n a^-1 mod p = \n%Zd ^-1\nmod %Zd =\n%Zd \n", a ,ptmp, inv_a);
 
     //Liberation de la memeoire allouee aux variables
-    mpz_clear(x);
-    mpz_clear(y);
-    mpz_clear(inv_a);
+    mpz_clears(x,y,inv_a,NULL);
 }

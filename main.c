@@ -3,6 +3,7 @@
 #include "gmp.h"
 #include "main.h"
 #include "euclide.h"
+#include "expmod.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -13,71 +14,19 @@
 #define TAILLE_MAX 1024
 //#define RAND_MAX 32767
 
-
-//#define WORD_BIT (sizeof(int) * CHAR_BIT)
-
 gmp_randstate_t state;
-
-//Declaration des variables globales
 
 //Variable reprensentant p
 mpz_t p_global;
 
 /*
- * Calcule de A ≡ g^a mod p de la question 4
- * stockage du resultat de g^a mod p dans  la variable res 
- * initialiser r avant l'appel à la fonction
- */
-void expMod(mpz_t res, mpz_t g, mpz_t a, mpz_t p){
-  
-    mpz_t quotient, rest, r0, r1, r2, r3, aTmp;
-    mpz_inits(quotient, rest, r0, r1, r2, r3, aTmp, (void *)NULL);
-    mpz_tdiv_qr_ui(quotient, rest, a, 2);
-
-    mpz_set(aTmp,a);
-		
-
-    if(mpz_sgn(a) == 0){
-        mpz_set_ui(res, 1);
-    }else{
-        if(mpz_cmp_ui(a, 1)==0){
-            mpz_mod(res, g, p);
-        }else{
-            if(mpz_sgn(rest)==0){
-                //expmod(g^2 mod p , a/2)
-                //g^2
-                mpz_mul(r0, g, g);
-                //mod p
-                mpz_mod(r1, r0, p);
-                //expMod(r0, p, g, 2);
-                expMod(res, r1,quotient, p);
-            }else{
-                //expmod((g × puissance(g^2 mod p , (a − 1)/2) )mod p)
-                //g^2
-                mpz_mul(r0, g, g);
-                //mod p
-                mpz_mod(r1, r0, p);
-                //(a-1) / 2
-                mpz_sub_ui(aTmp, a, 1);
-                mpz_tdiv_q_ui(quotient, aTmp, 2);
-
-                expMod(r2, r1, quotient, p);
-
-                mpz_mul(r3, r2, g);
-                mpz_mod(res, r3, p);
-            }  
-        }  
-    }
-}
-
-/*
- *KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
- *p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
- *X ≡ g x mod p. Elle renvoie en sortie x et X.
+ * KeyGen() est la fonction qui génère les clés de Bob, elle prend en entrée/sortie sans les modifier
+ * p et g, elle tire au hasard un x, la clé secrète de Bob et calcule sa clé publique correspondante
+ * X ≡ g x mod p. Elle renvoie en sortie x et X.
 */
 void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
            
-    //Generation de la cle privée x
+    // Generation de la cle privée x
     mpz_urandomm(x, state, p);
     mpz_add_ui(x, x, 2);
     
@@ -85,38 +34,39 @@ void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
     expMod(grand_X, g, x, p);
 
     // calcule du grand X ≡ g^x mod p --> 2eme methode
-    // mpz_powm(grand_X, g, x, p);   
-    // gmp_printf("===publicKeyOfA grand_X ===\n%Zd\n", grand_X);
+        // mpz_powm(grand_X, g, x, p);   
+        // gmp_printf("===publicKeyOfA grand_X ===\n%Zd\n", grand_X);
 }
 
-/**
+/*
  * Encrypt() est la fonction qui produit en sortie le couple chiffré (C ≡ m × y mod p, B ≡
  * g^r mod p) en prenant en entrée la clé publique de Bob K p = (p, g, X) et un message m
  * avec y ≡ X^r mod p et r alea.
  */
 void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t msg_chiffre, FILE* file_r) {
 	
-    //Initialisation des variables
+    // Initialisation des variables
 	mpz_t r, y;
+    mpz_inits(r, y, NULL);
 
     char chaine[TAILLE_MAX] = "";
     char c[TAILLE_MAX] = "";
-	
-    mpz_inits(r, y, NULL);
 
-    //generation de r aleatoire 
+    // generation de r aleatoire 
     mpz_urandomm(r, state, p);
 
+    //mettre le r genere dans une chaine de caractere dans la variable c
     mpz_get_str(c,10,r);
  
+    // Ouverture du fichier r.txt
     file_r = fopen("r.txt", "a+");
-    int sam;
+    int k;
     if (file_r != NULL)
     {
         while (fgets(chaine, TAILLE_MAX, file_r) != NULL) // On lit le fichier tant qu'on ne reçoit pas d'erreur (NULL)
         {
-            sam=strcmp(chaine,c);
-            if(sam == 10){
+            k = strcmp(chaine,c);
+            if(k == 10){ // Les deux chaines sont egaux
                 mpz_urandomm(r, state, p);
                 mpz_get_str(c,10,r);
                 rewind(file_r);//: remet le curseur au début du fichier    
@@ -125,9 +75,9 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
         gmp_fprintf(file_r,"%Zd\n", r); 
     }
     
+    // Fermeture du fichier
     fclose(file_r);
 
-    //---------------------------------------------------------------//
 	//------Calcul de y (y = X^r mod p)
 	expMod(y, grand_X, r, p);
 	//gmp_printf("y : \n%Zd", y);
@@ -169,9 +119,11 @@ void decrypt(mpz_t msg_dechiffre, mpz_t grand_C, mpz_t grand_B, mpz_t x) {
     mpz_clears(u,v,grand_D,NULL);
 }
 
-//Méthode renvoyant un int aléatoire compris entre a et b
-// On suppose a<b
 
+/*
+ * Méthode renvoyant un int aléatoire compris entre a et b
+ * On suppose a<b
+ */
 int rand_a_b(int a, int b) {
 	int res;
 	res = rand()%(b-a)+a;
@@ -183,28 +135,6 @@ int rand_a_b(int a, int b) {
  */
 int main(int argc, char * argv[]){
     
-    // init random state
-    //gmp_randinit_mt(state);
-    //gmp_randseed_ui(state, time(NULL));
-    //gmp_randseed_ui(state, 123987);
-
-    /*------------FILE READER-----------------------------------*/
-    // FILE* fichier = NULL;
-
-    // fichier = fopen("test.txt", "w");
- 
-    // if (fichier != NULL)
-    // { 
-    //     // On l'écrit dans le fichier
-    //     fprintf(fichier, "Le Monsieur qui utilise le programme");
-    //     fclose(fichier);
-    // }
-    // else
-    // {
-    //     // On affiche un message d'erreur si on veut
-    //     printf("\nImpossible d'ouvrir le fichier test.txt\n");
-    // }
-    /*----------------------------------------------------------*/
     //--------File test.txt----------------/
     FILE* f = NULL;
     char *new_str;
@@ -215,8 +145,6 @@ int main(int argc, char * argv[]){
     if (f == NULL)
     {
         f = fopen(new_str, "a+");
-        //fprintf(f,"%-15s  |%-15s  |%-15s  |\n\n","keyLength", "encrypt(ms)","decrypt(ms)");
-        //fprintf(f,"-----------KeyGen----------- \n");
     }
     else
     {
@@ -224,7 +152,7 @@ int main(int argc, char * argv[]){
         f = fopen(new_str, "a+");
     }
 
-    //-----File r.txt----------------/
+    //-----File r.txt pour stocke les r generé----------------/
     FILE* file_r = NULL;
     char *new_str2;
     asprintf(&new_str2,"%s","r.txt");
@@ -239,42 +167,50 @@ int main(int argc, char * argv[]){
         file_r = fopen(new_str2, "a+");
     }
 
+    // Declaration des variables mpz
     mpz_t g,p;
     mpz_t x,grand_X;
     mpz_t grand_B, grand_C;
     mpz_t msg_Entre,msg_Sortie;
 
-    //Initialisation de l'aleatoire (plus fiable en utilisant srand())
+    // Initialisation de l'aleatoire (plus fiable en utilisant srand())
     srand(time(NULL));
-    //initialisation de la borne minimum aleatoire
+
+    // initialisation de la borne minimum aleatoire
     int rand_min = rand();
-    //Test des 5 occurences
-    //boucle sur i
+
+    // Test des 5 occurences
+    // boucle sur i
     int i;
     for( i=0; i<5; i++) {
-    	fprintf(f,"---------------------------TEST %d---------------------------\n\n\n", i+1);
-    	//initialisation de l etat, utile pour le random gmp
+    	fprintf(f,"\n---------------------------TEST %d---------------------------\n\n\n", i+1);
+    	// initialisation de l etat, utile pour le random gmp
     	gmp_randinit_mt(state);
     	gmp_randseed_ui(state, time(NULL));
 		mpz_init(msg_Entre);
 		int message_int;
 		message_int = rand_a_b(rand_min, RAND_MAX); //message aleatoire entre rand_min et RAND_MAX
 		mpz_set_ui(msg_Entre, message_int);
-		//mpz_init_set_str(msg_Entre, plain, 16);
-		gmp_printf("\nmessage entre  --> %Zd\n",msg_Entre);
+				
+        //gmp_printf("\nmessage entre  --> %Zd\n",msg_Entre);
 		mpz_inits(x,grand_X, msg_Sortie,NULL);
 		mpz_inits(grand_C, grand_B,NULL);
-		// G initialization
+		
+        // G initialization
 		mpz_init(g);
 		mpz_set_ui(g, 2);
-		// P initialization
+		
+        // P initialization
 		mpz_init(p);
 		mpz_set_str(p, P_VAL_HEXA, 16);
-		//affectation de la valeur de p a p_global
+		
+        // Affectation de la valeur de p a p_global
 		mpz_set(p_global, p); 
-		//avoir Kp=(p,g,X), Ks=(x)
+		
+        // Avoir Kp=(p,g,X), Ks=(x)
 		keyGen(p,g,grand_X,x);
-		//Ecriture dans le fichier de Kp et Ks
+		
+        // Ecriture dans le fichier de Kp et Ks
 		fprintf(f,"------------------------KeyGen------------------------\n");
 		fprintf(f,"--------------------Cle publique Kp--------------------\n");
 		gmp_fprintf(f,"p = \n%Zd  \n\n", p);
@@ -284,19 +220,20 @@ int main(int argc, char * argv[]){
 		gmp_fprintf(f,"x = \n%Zd  \n\n", x);
 		fprintf(f,"----------------Chiffrement du message----------------\n");
 		gmp_fprintf(f,"message entre  --> %Zd\n\n", msg_Entre);
-
+        
+        // Chiffrement
 		encrypt(grand_C, grand_B, p, g, grand_X, msg_Entre, file_r);
 
 		fprintf(f,"---------------Dechiffrement du message---------------\n");
-
+        // Dechiffrement
 		decrypt(msg_Sortie,grand_C, grand_B, x);
 
 		gmp_fprintf(f,"message sortie --> %Zd  \n\n", msg_Sortie);
-		gmp_printf("message sorite --> %Zd  \n\n", msg_Sortie);
+		//gmp_printf("message sorite --> %Zd  \n\n", msg_Sortie);
 	}
 
 
-	//Affichage des aléas r dans le fichier test.txt
+	// Affichage des aléas r dans le fichier test.txt
 	char chaine1[TAILLE_MAX] = "";
     fprintf(f, "\n\n\n\n---------------------LISTE DES ALEA R---------------------\n\n");
     if (f != NULL)
@@ -307,16 +244,12 @@ int main(int argc, char * argv[]){
         }
     }
 
+    printf("\n\n\n fichier test.txt genere  \n\n\n");
+    // Fermeture des fichiers
 	fclose(f);
 	fclose(file_r);
-    // CLEAN
-    mpz_clear(p);
-    mpz_clear(x);
-    mpz_clear(g);
-    mpz_clear(p_global);
-    mpz_clear(grand_X);
-    mpz_clear(grand_B);
-    mpz_clear(grand_C);
 
+    // CLEAN variable mpz
+    mpz_clears(p,x,g,p_global,grand_X,grand_B,grand_C,NULL);
 	return 0;
 }
