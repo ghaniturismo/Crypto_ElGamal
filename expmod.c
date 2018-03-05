@@ -15,7 +15,6 @@ void expMod(mpz_t resultat, mpz_t g, mpz_t a, mpz_t p){
 
     mpz_set(aTmp,a);
 		
-
     if(mpz_sgn(a) == 0){
         mpz_set_ui(resultat, 1);
     }else{
