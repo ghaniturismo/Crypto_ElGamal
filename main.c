@@ -1,3 +1,10 @@
+/* ______________________________________________
+  |                                              |
+  | ----------- DM Init-Cryptographie -----------|
+  | -- Implémentation de l'algorithme El Gamal --|
+  | -- MAZROU Abdelghani ****** BENTOUNES Samy --|
+  |______________________________________________|
+*/
 #define _GNU_SOURCE
 
 #include "main.h"
@@ -9,7 +16,6 @@
 #include <limits.h>
 #include <time.h>
 #include <string.h>
-#include <sodium.h>
 
 #define TAILLE_MAX 1024
 
@@ -33,10 +39,6 @@ void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
     mpz_urandomm(x, state, tmp);
     mpz_add_ui(x, x, 2);
 
-    // Generation de la cle privée x
-    // mpz_urandomm(x, state, p);
-    // mpz_add_ui(x, x, 2);
-
     // calcule du grand X ≡ g^x mod p --> 1eme methode
     expMod(grand_X, g, x, p);
     
@@ -51,21 +53,15 @@ void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
  */
 void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t msg_chiffre, FILE* file_r) {
 	
-    // Initialisation des variables
-	// mpz_t r, y;
- //    mpz_inits(r, y, NULL);
-
     mpz_t tmp, r, y;
-    //gmp_randstate_t state;
+
     mpz_inits(tmp, r, y, NULL);
 
     // tirer r au hasard 2 et p-2
     mpz_sub_ui(tmp, p, 2);
 
     gmp_randinit_default(state);
-    //long df = time(NULL);
-    //printf("%d", df);
-    //gmp_randseed_ui(state, df);
+
     gmp_randseed_ui(state, time(NULL)*7);
     mpz_urandomm(r, state, tmp);
     mpz_add_ui(r, r, 2);
@@ -73,10 +69,7 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
     char chaine[TAILLE_MAX] = "";
     char c[TAILLE_MAX] = "";
 
-    // generation de r aleatoire 
-    mpz_urandomm(r, state, p);
-
-    //mettre le r genere dans une chaine de caractere dans la variable c
+    // Mettre le r genere dans une chaine de caractere dans la variable c
     mpz_get_str(c,10,r);
  
     // Ouverture du fichier r.txt
@@ -106,7 +99,7 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
 	expMod(grand_B, g, r, p);
 
 	//------Calcul de grand_C (C ≡ m × y mod p)
-	//m * y
+	// m * y
 	mpz_mul(grand_C, msg_chiffre, y);
 	mpz_mod(grand_C, grand_C, p);
 
@@ -150,14 +143,13 @@ int rand_a_b(int a, int b) {
 }
 
 /*
- *  main
+ * *********************************************** main ************************************************
  */
 int main(int argc, char * argv[]){
     
     //--------File test.txt----------------/
     FILE* f = NULL;
     char *new_str;
-    //char *new_str1;
     asprintf(&new_str,"%s","test.txt");
     f = fopen(new_str, "r");
     remove("test.txt");
@@ -195,8 +187,8 @@ int main(int argc, char * argv[]){
     mpz_t m,m1,m2,m1m2;
     mpz_t grand_B_m1, grand_C_m1;
     mpz_t grand_B_m2, grand_C_m2;
-
     mpz_t b, c;
+    
     mpz_inits(m,m1,m2,m1m2,grand_B_m1,grand_C_m1,grand_B_m2,grand_C_m2,b,c,NULL);
 
     mpz_set_ui(m1, 10102010);
@@ -211,13 +203,13 @@ int main(int argc, char * argv[]){
     // ---------------------------------- Test des 5 occurences ----------------------------------
     int i;
     for( i=0; i<5; i++) {
-        fprintf(f,"\n--------------------------------KeyGen---------------------------------\n");
     	fprintf(f,"\n--------------------------------TEST %d--------------------------------\n\n\n", i+1);
     	// initialisation de l etat, utile pour le random gmp
     	gmp_randinit_mt(state);
     	gmp_randseed_ui(state, time(NULL));
 		mpz_init(msg_Entre);
-		int message_int;
+		
+        int message_int;
 		message_int = rand_a_b(rand_min, RAND_MAX); //message aleatoire entre rand_min et RAND_MAX
 		mpz_set_ui(msg_Entre, message_int);
 		mpz_inits(x,grand_X, msg_Sortie,NULL);
@@ -258,7 +250,8 @@ int main(int argc, char * argv[]){
     fprintf(f,"\n*************************** QUESTION 6 ***************************************\n");
     keyGen(p,g,grand_X,x);
     gmp_fprintf(f, "m1 = %Zd \n", m1);
-    gmp_fprintf(f, "m2 = %Zd \n", m2);        
+    gmp_fprintf(f, "m2 = %Zd \n", m2);
+
     // Chiffrement de m1 et m2
     encrypt(grand_C_m1, grand_B_m1, p, g, grand_X, m1, file_r);
     encrypt(grand_C_m2, grand_B_m2, p, g, grand_X, m2, file_r);
@@ -303,8 +296,11 @@ int main(int argc, char * argv[]){
     // Fermeture des fichiers
 	fclose(f);
 	fclose(file_r);
+    // Suppression du fichier r.txt
+    remove("r.txt");
 
     // CLEAN variable mpz
-    mpz_clears(p,x,g,grand_X,grand_B,grand_C,NULL);
+    mpz_clears(p,x,g,grand_X,grand_B,grand_C,m,m1,m2,m1m2,grand_B_m1,grand_C_m1,grand_B_m2,grand_C_m2,b,c,NULL);
+
 	return 0;
 }

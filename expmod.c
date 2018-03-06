@@ -1,6 +1,13 @@
-
-#include<stdio.h>
-#include<gmp.h>
+/* ______________________________________________
+  |                                              |
+  | ----------- DM Init-Cryptographie -----------|
+  | -- Implémentation de l'algorithme El Gamal --|
+  | -- MAZROU Abdelghani ****** BENTOUNES Samy --|
+  |______________________________________________|
+*/
+  
+#include <stdio.h>
+#include <gmp.h>
 
 /*
  * Calcule de A ≡ g^a mod p de la question 4

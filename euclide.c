@@ -1,6 +1,13 @@
-
-#include<stdio.h>
-#include<gmp.h>
+/* ______________________________________________
+  |                                              |
+  | ----------- DM Init-Cryptographie -----------|
+  | -- Implémentation de l'algorithme El Gamal --|
+  | -- MAZROU Abdelghani ****** BENTOUNES Samy --|
+  |______________________________________________|
+*/
+  
+#include <stdio.h>
+#include <gmp.h>
 
 //Affichage de "a*u + b*v = p"
 void printauplusbv(mpz_t a, mpz_t u, mpz_t b, mpz_t v, mpz_t p) 

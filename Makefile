@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lgmpxx -lgmp -lsodium
+CFLAGS = -lgmpxx -lgmp 
 
 OBJS = main.c euclide.c expmod.c
 
