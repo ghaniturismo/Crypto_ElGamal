@@ -12,7 +12,6 @@
 #include <sodium.h>
 
 #define TAILLE_MAX 1024
-//#define RAND_MAX 32767
 
 gmp_randstate_t state;
 
@@ -22,10 +21,21 @@ gmp_randstate_t state;
  * X ≡ g x mod p. Elle renvoie en sortie x et X.
 */
 void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
-           
-    // Generation de la cle privée x
-    mpz_urandomm(x, state, p);
+
+    mpz_t tmp;
+    mpz_init(tmp);
+    // tirer x au hasard 2 et p-2
+    mpz_sub_ui(tmp, p, 2);
+
+    gmp_randinit_default(state);
+
+    gmp_randseed_ui(state, time(NULL)*7);
+    mpz_urandomm(x, state, tmp);
     mpz_add_ui(x, x, 2);
+
+    // Generation de la cle privée x
+    // mpz_urandomm(x, state, p);
+    // mpz_add_ui(x, x, 2);
 
     // calcule du grand X ≡ g^x mod p --> 1eme methode
     expMod(grand_X, g, x, p);
@@ -46,7 +56,7 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
  //    mpz_inits(r, y, NULL);
 
     mpz_t tmp, r, y;
-    gmp_randstate_t state;
+    //gmp_randstate_t state;
     mpz_inits(tmp, r, y, NULL);
 
     // tirer r au hasard 2 et p-2
@@ -56,10 +66,9 @@ void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t
     //long df = time(NULL);
     //printf("%d", df);
     //gmp_randseed_ui(state, df);
-    gmp_randseed_ui(state, time(NULL)*5);
+    gmp_randseed_ui(state, time(NULL)*7);
     mpz_urandomm(r, state, tmp);
     mpz_add_ui(r, r, 2);
-
 
     char chaine[TAILLE_MAX] = "";
     char c[TAILLE_MAX] = "";
