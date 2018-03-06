@@ -1,6 +1,5 @@
 #define _GNU_SOURCE
 
-#include "gmp.h"
 #include "main.h"
 #include "euclide.h"
 #include "expmod.h"
@@ -10,6 +9,7 @@
 #include <limits.h>
 #include <time.h>
 #include <string.h>
+#include <sodium.h>
 
 #define TAILLE_MAX 1024
 //#define RAND_MAX 32767
@@ -42,8 +42,24 @@ void keyGen(mpz_t p, mpz_t g, mpz_t grand_X, mpz_t x){
 void encrypt(mpz_t grand_C,mpz_t grand_B, mpz_t p, mpz_t g, mpz_t grand_X, mpz_t msg_chiffre, FILE* file_r) {
 	
     // Initialisation des variables
-	mpz_t r, y;
-    mpz_inits(r, y, NULL);
+	// mpz_t r, y;
+ //    mpz_inits(r, y, NULL);
+
+    mpz_t tmp, r, y;
+    gmp_randstate_t state;
+    mpz_inits(tmp, r, y, NULL);
+
+    // tirer r au hasard 2 et p-2
+    mpz_sub_ui(tmp, p, 2);
+
+    gmp_randinit_default(state);
+    //long df = time(NULL);
+    //printf("%d", df);
+    //gmp_randseed_ui(state, df);
+    gmp_randseed_ui(state, time(NULL)*5);
+    mpz_urandomm(r, state, tmp);
+    mpz_add_ui(r, r, 2);
+
 
     char chaine[TAILLE_MAX] = "";
     char c[TAILLE_MAX] = "";

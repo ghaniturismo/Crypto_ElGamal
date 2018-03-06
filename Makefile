@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lgmpxx -lgmp
+CFLAGS = -lgmpxx -lgmp -lsodium
 
 OBJS = main.c euclide.c expmod.c
 
@@ -10,3 +10,5 @@ main.o: $(OBJS)
 
 clean:
 	rm -f *~ *.o main 
+	rm -f test.txt
+	rm -f r.txt
