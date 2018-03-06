@@ -297,7 +297,7 @@ int main(int argc, char * argv[]){
 	fclose(f);
 	fclose(file_r);
     // Suppression du fichier r.txt
-    remove("r.txt");
+    //remove("r.txt");
 
     // CLEAN variable mpz
     mpz_clears(p,x,g,grand_X,grand_B,grand_C,m,m1,m2,m1m2,grand_B_m1,grand_C_m1,grand_B_m2,grand_C_m2,b,c,NULL);
